@@ -1,0 +1,33 @@
+{
+  "name": "co-suspend",
+  "version": "0.0.1",
+  "description": "Suspend execution until it is resumed asynchronously.",
+  "main": "index.js",
+  "scripts": {
+    "test": "mocha --harmony"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/yanickrochon/co-suspend.git"
+  },
+  "keywords": [
+    "co",
+    "suspend",
+    "async",
+    "wait",
+    "pause",
+    "resume"
+  ],
+  "author": "Yanick Rochon <yanick.rochon@gmail.com>",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/yanickrochon/co-suspend/issues"
+  },
+  "homepage": "https://github.com/yanickrochon/co-suspend",
+  "devDependencies": {
+    "co": "~3.0.4",
+    "mocha": "~1.18.0",
+    "co-mocha": "0.0.2",
+    "should": "~3.1.3"
+  }
+}
