@@ -1,6 +1,6 @@
 {
   "name": "co-suspend",
-  "version": "0.0.2",
+  "version": "0.0.3",
   "description": "Suspend execution until it is resumed asynchronously.",
   "main": "index.js",
   "scripts": {

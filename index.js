@@ -51,7 +51,7 @@ module.exports = function suspend() {
 /**
 Custom async error
 */
-var AsyncTimeoutError = function AsyncTimeoutError(msg) {
+var AsyncTimeoutError = module.exports.AsyncTimeoutError = function AsyncTimeoutError(msg) {
   msg && (this.message = msg);
   Error.apply(this, arguments);
   Error.captureStackTrace(this, AsyncTimeoutError);
