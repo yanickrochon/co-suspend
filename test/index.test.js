@@ -86,7 +86,7 @@ describe('Co Suspend', function () {
 
     //error.should.be.an.Error;
     error.should.be.instanceof(suspend.AsyncTimeoutError);
-    error.message.should.equal('Asynchronous timeout');
+    error.message.should.equal('Asynchronous timeout : 50 ms');
 
   });
 

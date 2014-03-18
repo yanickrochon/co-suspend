@@ -10,7 +10,7 @@ module.exports = function suspend() {
       if (timeout) {
         timer = setTimeout(function () {
           timer = false;
-          timeoutError = new AsyncTimeoutError('Asynchronous timeout');
+          timeoutError = new AsyncTimeoutError('Asynchronous timeout : ' + timeout + ' ms');
 
           if (done instanceof Function) {
             done(timeoutError);
