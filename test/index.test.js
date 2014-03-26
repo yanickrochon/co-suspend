@@ -73,6 +73,26 @@ describe('Co Suspend', function () {
 
   });
 
+  it('should be reusable', function * () {
+    var marker = suspend();
+
+    var fn = function * (t, m) {
+      var marker = suspend();
+
+      setTimeout(function () {
+        marker.resume(null, m);
+      }, t);
+
+      return yield marker.wait();
+    };
+
+    (yield fn(10, 'msg1')).should.be.equal('msg1');
+    (yield fn(20, 'msg2')).should.be.equal('msg2');
+    (yield fn(10, 'msg3')).should.be.equal('msg3');
+    (yield fn(30, 'msg4')).should.be.equal('msg4');
+
+  });
+
   it('should timeout', function * () {
     var error;
 

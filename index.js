@@ -19,6 +19,13 @@ function createMarker() {
   var timer;
   var args;
 
+  function reset() {
+    done = false;
+    timeoutError = null;
+    timer = undefined;
+    args = undefined;
+  }
+
   return {
     wait: function wait(timeout) {
       if (timeout) {
@@ -35,6 +42,7 @@ function createMarker() {
       return function wait(cb) {
         if (done) {
           cb.apply(null, args);
+          reset();
         } else {
           if (timeoutError) {
             cb(timeoutError);
@@ -52,6 +60,7 @@ function createMarker() {
 
         if (done instanceof Function) {
           done.apply(null, arguments);
+          reset();
         } else {
           args = arguments;
           done = true;

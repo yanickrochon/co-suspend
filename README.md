@@ -80,6 +80,28 @@ try {
 }
 ```
 
+## Example 4
+
+Markers are reusable, too!
+
+```javascript
+var marker = suspend();
+var result;
+
+someAsyncFunctionWithCallback(marker.resume);
+result = yield marker.wait();
+//....
+
+otherAsyncFunctionWithCallback(marker.resume);
+result = yield marker.wait();
+//...
+
+finalAsyncWithCallback(marker.resume);
+result = yield marker.wait();
+//...
+```
+
+
 ## License
 
 MIT
