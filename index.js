@@ -1,5 +1,19 @@
+/**
+Suspend
+*/
 
+/**
+Expose function
+*/
 module.exports = function suspend() {
+  return createMarker();
+};
+
+
+/**
+Wrap inside a builder method to encapsulate the marker
+*/
+function createMarker() {
   var done = false;
   var timeoutError = null;
   var timer;
@@ -45,7 +59,7 @@ module.exports = function suspend() {
       }
     }
   };
-};
+}
 
 
 /**

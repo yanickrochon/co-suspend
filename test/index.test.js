@@ -59,6 +59,18 @@ describe('Co Suspend', function () {
     this.timeout(200);
 
     (yield fn(100)).should.equal('foo');
+
+
+    var fn2 = function * (t) {
+      var marker = suspend();
+
+      marker.resume(null, 'bar');
+
+      return yield marker.wait();
+    };
+
+    (yield fn2(100)).should.equal('bar');
+
   });
 
   it('should timeout', function * () {
