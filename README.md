@@ -55,7 +55,7 @@ function * getFiles(path) {
 Wait a certain amount of time (milliseconds) before timing out.
 
 ```javascript
-var fs = require('fs');
+var db = require('./some-db-module');
 var suspend = require('co-suspend');
 
 function * connect(conStr) {
