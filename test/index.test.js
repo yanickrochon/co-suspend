@@ -74,15 +74,18 @@ describe('Co Suspend', function () {
   });
 
   it('should be reusable', function * () {
+    var expectedSequence = '01234567';
+    var sequence = '';
+    var seqIndex = 0;
     var marker = suspend();
 
     var fn = function * (t, m) {
-      var marker = suspend();
-
       setTimeout(function () {
+        sequence += (seqIndex++);
         marker.resume(null, m);
       }, t);
 
+      sequence += (seqIndex++);
       return yield marker.wait();
     };
 
@@ -90,6 +93,8 @@ describe('Co Suspend', function () {
     (yield fn(20, 'msg2')).should.be.equal('msg2');
     (yield fn(10, 'msg3')).should.be.equal('msg3');
     (yield fn(30, 'msg4')).should.be.equal('msg4');
+
+    sequence.should.equal(expectedSequence);
 
   });
 
