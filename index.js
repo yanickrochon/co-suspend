@@ -1,80 +1,139 @@
 /**
 Suspend
 */
+var globalIndex = 0;
 
 /**
 Expose function
 */
-module.exports = function suspend() {
-  return createMarker();
-};
+module.exports = createMarker;
+module.exports.SuspendError = SuspendError;
+module.exports.AsyncTimeoutError = AsyncTimeoutError;
 
 
 /**
 Wrap inside a builder method to encapsulate the marker
 */
 function createMarker() {
+  var markerId = ++globalIndex;
+  var active = false;
   var done = false;
   var timeoutError = null;
   var timer;
   var args;
 
   function reset() {
+    var _saved = {
+      active: active,
+      done: done,
+      timeoutError: timeoutError,
+      timer: timer,
+      args: args
+    };
+
+    active = false;
     done = false;
     timeoutError = null;
     timer = undefined;
     args = undefined;
+
+    return _saved;
   }
 
-  return {
-    wait: function wait(timeout) {
-      if (timeout) {
-        timer = setTimeout(function () {
-          timer = false;
-          timeoutError = new AsyncTimeoutError('Asynchronous timeout : ' + timeout + ' ms');
+  function wait(timeout) {
+    if (active) {
+      throw new SuspendError('Marker already in use');
+    }
+    active = true;
 
-          if (done instanceof Function) {
-            done(timeoutError);
-          }
-        }, timeout);
-      }
+    if (timeout) {
+      timer = setTimeout(function () {
+        var saved;
 
-      return function wait(cb) {
-        if (done) {
-          cb.apply(null, args);
-          reset();
-        } else {
-          if (timeoutError) {
-            cb(timeoutError);
-          } else {
-            done = cb;
-          }
-        }
-      };
-    },
-    resume: function resume() {
-      if (!timeoutError) {
-        if (timer) {
-          clearTimeout(timer);
-        }
+        timeoutError = new AsyncTimeoutError('Asynchronous timeout : ' + timeout + ' ms');
 
         if (done instanceof Function) {
-          done.apply(null, arguments);
-          reset();
+          saved = reset();
+          saved.done(saved.timeoutError);
+        }
+      }, timeout);
+    }
+
+    return function wait(cb) {
+      var saved;
+
+      if (done) {
+        saved = reset();
+        cb.apply(null, saved.args);
+      } else {
+        if (timeoutError) {
+          saved = reset();
+          cb(saved.timeoutError);
         } else {
-          args = arguments;
-          done = true;
+          done = cb;
         }
       }
+    };
+  }
+
+  function resume() {
+    var saved;
+
+    if (!timeoutError) {
+      if (timer) {
+        clearTimeout(timer);
+        timer = undefined;
+      }
+
+      if (done instanceof Function) {
+        saved = reset()
+
+        saved.done.apply(this, arguments);
+      } else {
+        args = arguments;
+        done = true;
+      }
     }
-  };
+  }
+
+  return Object.create(null, {
+    _id: {
+      enumerable: true,
+      configurable: false,
+      writable: false,
+      value: markerId
+    },
+    wait: {
+      enumerable: true,
+      configurable: false,
+      writable: false,
+      value: wait
+    },
+    resume: {
+      enumerable: true,
+      configurable: false,
+      writable: false,
+      value: resume
+    }
+  });
 }
 
 
 /**
+Custom suspend error
+*/
+function SuspendError(msg) {
+  msg && (this.message = msg);
+  Error.apply(this, arguments);
+  Error.captureStackTrace(this, SuspendError);
+};
+require('util').inherits(SuspendError, Error);
+SuspendError.prototype.name = SuspendError.name;
+
+/**
 Custom async error
 */
-var AsyncTimeoutError = module.exports.AsyncTimeoutError = function AsyncTimeoutError(msg) {
+function AsyncTimeoutError(msg) {
   msg && (this.message = msg);
   Error.apply(this, arguments);
   Error.captureStackTrace(this, AsyncTimeoutError);
