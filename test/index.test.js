@@ -4,7 +4,6 @@ var suspend = require('..');
 describe('Co Suspend', function () {
 
   it('should suspend and resume', function * () {
-
     var fn = function * (t) {
       var marker = suspend();
 
@@ -45,7 +44,6 @@ describe('Co Suspend', function () {
   });
 
   it('should return waited value', function * () {
-
     var fn = function * (t) {
       var marker = suspend();
 
@@ -70,7 +68,6 @@ describe('Co Suspend', function () {
     };
 
     (yield fn2(100)).should.equal('bar');
-
   });
 
   it('should be reusable', function * () {
@@ -95,7 +92,6 @@ describe('Co Suspend', function () {
     (yield fn(30, 'msg4')).should.be.equal('msg4');
 
     sequence.should.equal(expectedSequence);
-
   });
 
   it('should timeout', function * () {
@@ -125,6 +121,43 @@ describe('Co Suspend', function () {
     error.should.be.instanceof(suspend.AsyncTimeoutError);
     error.message.should.equal('Asynchronous timeout : 50 ms');
 
+  });
+
+  it('should allow calling resume multiple times', function * () {
+    var marker = suspend();
+    var fn = function * (t) {
+      setTimeout(function () {
+        marker.resume();
+      }, t);
+
+      return yield marker.wait();
+    };
+
+    this.timeout(50);
+
+    yield fn(20);
+
+    marker.resume();
+    marker.resume();
+    marker.resume();
+
+  });
+
+  it('should return valid active state', function * () {
+    var marker = suspend();
+
+    marker.isWaiting.should.be.false;
+    marker.resume();
+    marker.isWaiting.should.be.false;
+    yield marker.wait(); // will not wait...
+    marker.isWaiting.should.be.false;
+
+    setTimeout(function () {
+      marker.isWaiting.should.be.true;
+      marker.resume();
+      marker.isWaiting.should.be.false;
+    }, 20);
+    yield marker.wait();
   });
 
 });

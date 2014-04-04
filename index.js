@@ -114,6 +114,13 @@ function createMarker() {
       configurable: false,
       writable: false,
       value: resume
+    },
+    isWaiting: {
+      enumerable: true,
+      configurable: false,
+      get: function isWaiting() {
+        return active
+      }
     }
   });
 }
