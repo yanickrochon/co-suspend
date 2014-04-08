@@ -1,4 +1,5 @@
 
+var co = require('co');
 var suspend = require('..');
 
 describe('Co Suspend', function () {
@@ -120,7 +121,25 @@ describe('Co Suspend', function () {
     error.should.be.an.Error;
     error.should.be.instanceof(suspend.AsyncTimeoutError);
     error.message.should.equal('Asynchronous timeout : 50 ms');
+  });
 
+  it('should not allow concurrent use', function * () {
+    var marker = suspend();
+
+    this.timeout(200);
+
+    setTimeout(function () {
+      co(function * () {
+        yield marker.wait();
+      })(function (err) {
+        err.should.be.an.Error;
+        err.message.should.equal('Marker already in use');
+
+        marker.resume();  // all good!
+      });
+    }, 50);
+
+    return yield marker.wait(100);
   });
 
   it('should allow calling resume multiple times', function * () {
@@ -140,7 +159,6 @@ describe('Co Suspend', function () {
     marker.resume();
     marker.resume();
     marker.resume();
-
   });
 
   it('should return valid active state', function * () {

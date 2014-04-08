@@ -18,13 +18,10 @@ var suspend = require('co-suspend');
 
 module.exports.fetchContent = function * (url) {
   var marker = suspend();
-  request('http://www.google.com', function (err, res, body) {
-    if (err) {
-      throw err;
-    }
 
-    marker.resume(null, body);
-  })
+  request('http://www.google.com', function (err, res, body) {
+    marker.resume(err, body);
+  });
 
   return yield marker.wait();  // return body
 };

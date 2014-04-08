@@ -1,6 +1,6 @@
 {
   "name": "co-suspend",
-  "version": "0.1.2",
+  "version": "0.1.3",
   "description": "Suspend execution until it is resumed asynchronously.",
   "main": "index.js",
   "scripts": {
@@ -29,5 +29,8 @@
     "mocha": "~1.18.0",
     "co-mocha": "0.0.2",
     "should": "~3.1.4"
+  },
+  "dependencies": {
+    "error-factory": "0.0.3"
   }
 }

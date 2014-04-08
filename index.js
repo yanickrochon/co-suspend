@@ -1,7 +1,14 @@
 /**
 Suspend
 */
+
+var errorFactory = require('error-factory');
+
+var SuspendError = errorFactory('SuspendError');
+var AsyncTimeoutError = errorFactory('AsyncTimeoutError');
+
 var globalIndex = 0;
+
 
 /**
 Expose function
@@ -124,26 +131,3 @@ function createMarker() {
     }
   });
 }
-
-
-/**
-Custom suspend error
-*/
-function SuspendError(msg) {
-  msg && (this.message = msg);
-  Error.apply(this, arguments);
-  Error.captureStackTrace(this, SuspendError);
-};
-require('util').inherits(SuspendError, Error);
-SuspendError.prototype.name = SuspendError.name;
-
-/**
-Custom async error
-*/
-function AsyncTimeoutError(msg) {
-  msg && (this.message = msg);
-  Error.apply(this, arguments);
-  Error.captureStackTrace(this, AsyncTimeoutError);
-};
-require('util').inherits(AsyncTimeoutError, Error);
-AsyncTimeoutError.prototype.name = AsyncTimeoutError.name;
