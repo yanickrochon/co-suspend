@@ -31,6 +31,7 @@
     "should": "~3.1.4"
   },
   "dependencies": {
-    "error-factory": "0.0.3"
+    "error-factory": "0.0.3",
+    "should": "^3.1.4"
   }
 }
