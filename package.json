@@ -28,9 +28,9 @@
     "error-factory": "0.0.15"
   },
   "devDependencies": {
-    "co": "~3.0.5",
+    "co": "~3.0.6",
     "mocha": "~1.18.2",
-    "co-mocha": "0.0.2",
+    "co-mocha": "0.0.4",
     "should": "~3.3.1"
   }
 }
