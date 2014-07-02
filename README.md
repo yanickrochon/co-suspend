@@ -98,6 +98,38 @@ result = yield marker.wait();
 //...
 ```
 
+## Example 5
+
+Using an experimental feature to enqueue some yieldable in the waiting marker.
+
+```javascript
+var marker = suspend();
+var result;
+
+var q = db.query(selectQuery, marker.resume);
+q.on('row', function (row) {
+  marker.enqueue(function * () {
+    // process row asynchronously... the marker will wait for this to return!
+  });
+
+  marker.enqueue(function (done) {
+    // this works, too! In fact, anything co compatible will work just fine
+    // as argument to .enqueue()
+
+    setTimeout(done, 3000);
+  });
+});
+
+result = yield marker.wait(QUERY_TIMEOUT);
+```
+
+**Note**: calling `marker.enqueue()` to an un-waiting marker will simply execute
+the yieldable (function, generator, thunk, etc.) inside an anonymous `co` context.
+
+**Note**: because `marker.enqueue()` is meant to be used inside a synchronous
+context, the function does not return anything. In fact, there is really no reason
+why it should return anything.
+
 
 ## License
 

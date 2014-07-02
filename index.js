@@ -2,6 +2,8 @@
 Suspend
 */
 
+var co = require('co');
+
 var errorFactory = require('error-factory');
 
 var SuspendError = errorFactory('SuspendError');
@@ -23,41 +25,42 @@ Wrap inside a builder method to encapsulate the marker
 */
 function createMarker() {
   var markerId = ++globalIndex;
-  var active = false;
+  var waiting = false;
   var done = false;
+  var doneArgs = undefined;
   var timeoutError = null;
+  var queueCount = 0;
   var timer;
-  var args;
 
   function reset() {
     var _saved = {
-      active: active,
+      //waiting: waiting,
       done: done,
-      timeoutError: timeoutError,
-      timer: timer,
-      args: args
+      doneArgs: doneArgs,
+      timeoutError: timeoutError//,
+      //timer: timer
     };
 
-    active = false;
+    waiting = false;
     done = false;
+    doneArgs = undefined;
     timeoutError = null;
     timer = undefined;
-    args = undefined;
 
     return _saved;
   }
 
   function wait(timeout) {
-    if (active) {
-      throw new SuspendError('Marker already in use');
+    if (waiting) {
+      throw SuspendError('Marker already in use');
     }
-    active = true;
+    waiting = true;
 
     if (timeout) {
       timer = setTimeout(function () {
         var saved;
 
-        timeoutError = new AsyncTimeoutError('Asynchronous timeout : ' + timeout + ' ms');
+        timeoutError = AsyncTimeoutError('Asynchronous timeout : ' + timeout + ' ms');
 
         if (done instanceof Function) {
           saved = reset();
@@ -71,7 +74,7 @@ function createMarker() {
 
       if (done) {
         saved = reset();
-        cb.apply(null, saved.args);
+        cb.apply(null, saved.doneArgs || []);
       } else {
         if (timeoutError) {
           saved = reset();
@@ -86,6 +89,13 @@ function createMarker() {
   function resume() {
     var saved;
 
+    if (queueCount) {
+      if (arguments.length) {
+        doneArgs = arguments;
+      }
+      return;   // still waiting for queue to complete...
+    }
+
     if (!timeoutError) {
       if (timer) {
         clearTimeout(timer);
@@ -95,12 +105,24 @@ function createMarker() {
       if (done instanceof Function) {
         saved = reset()
 
-        saved.done.apply(this, arguments);
+        saved.done.apply(this, saved.doneArgs || arguments);
       } else {
-        args = arguments;
+        !doneArgs && arguments.length && (doneArgs = arguments);
         done = true;
       }
     }
+  }
+
+  function enqueue(fn) {
+    ++queueCount;
+
+    co(function * () { yield fn; })(function () {
+      --queueCount;
+
+      if (waiting) {
+        resume();  // try to resume
+      }
+    });
   }
 
   return Object.create(null, {
@@ -122,11 +144,17 @@ function createMarker() {
       writable: false,
       value: resume
     },
+    enqueue: {
+      enumerable: true,
+      configurable: false,
+      writable: false,
+      value: enqueue
+    },
     isWaiting: {
       enumerable: true,
       configurable: false,
       get: function isWaiting() {
-        return active
+        return waiting
       }
     }
   });

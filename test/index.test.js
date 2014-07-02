@@ -123,6 +123,24 @@ describe('Co Suspend', function () {
     error.message.should.equal('Asynchronous timeout : 50 ms');
   });
 
+  it('should timeout on wait', function (done) {
+    var marker = suspend();
+    var markerWait;
+
+    this.timeout(100);
+
+    markerWait = marker.wait(10);
+
+    setTimeout(function () {
+      markerWait(function (err) {
+        err.should.be.an.Error;
+
+        done();
+      });
+    }, 20);
+
+  });
+
   it('should not allow concurrent use', function * () {
     var marker = suspend();
 
@@ -176,6 +194,61 @@ describe('Co Suspend', function () {
       marker.isWaiting.should.be.false;
     }, 20);
     yield marker.wait();
+  });
+
+
+  it('should enqueue more yieldables', function (done) {
+    var marker = suspend();
+    var steps = [];
+    var rs;
+
+    co(function * () {
+      var waitForResume = true;
+
+      setTimeout(function () {
+        steps.push(1);
+
+        marker.resume(null, "Hello world!");
+
+        steps.push(2);
+
+        waitForResume = false;  // should exit while below...
+      }, 100);
+
+      // return only resolve only AFTER marker.resume() is called
+      marker.enqueue(function * () {
+        steps.push(0);
+        while (waitForResume) {  // wait for setTimeut above...
+          yield function * () {};
+        }
+        steps.push(3);
+      });
+
+      marker.enqueue(function (done) {
+        setTimeout(function () {
+
+          waitForResume.should.be.false;
+
+          steps.push(4);
+
+          done();
+        }, 300);
+      });
+
+      rs = yield marker.wait(1000);
+
+      steps.push(5);
+
+      return rs;
+    })(function (err, rs) {
+      assert.equal(err, undefined);
+
+      steps.should.eql([0, 1, 2, 3, 4, 5]);
+      rs.should.equal('Hello world!');
+
+      done();
+    });
+
   });
 
 });
