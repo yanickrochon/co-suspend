@@ -56,7 +56,7 @@ function createMarker() {
     }
     waiting = true;
 
-    if (timeout) {
+    if (timeout && (timeout != Infinity)) {
       timer = setTimeout(function () {
         var saved;
 

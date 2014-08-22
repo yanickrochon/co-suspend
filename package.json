@@ -1,6 +1,6 @@
 {
   "name": "co-suspend",
-  "version": "0.1.5",
+  "version": "0.1.6",
   "description": "Suspend execution until it is resumed asynchronously.",
   "main": "index.js",
   "scripts": {
@@ -25,12 +25,12 @@
   },
   "homepage": "https://github.com/yanickrochon/co-suspend",
   "dependencies": {
-    "error-factory": "0.0.16"
+    "error-factory": "0.1.0"
   },
   "devDependencies": {
-    "co": "~3.0.6",
-    "mocha": "~1.20.1",
-    "co-mocha": "0.0.4",
+    "co": "~3.1.0",
+    "mocha": "~1.21.4",
+    "co-mocha": "1.0.0",
     "semicov": "^0.1.1-2",
     "should": "~4.0.4"
   }
