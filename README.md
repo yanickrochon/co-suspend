@@ -1,3 +1,9 @@
+# Deprecated
+
+This project is no longer maintained, please check out [@yanfoo/suspense](https://www.npmjs.com/package/@yanfoo/suspense).
+
+---
+
 # co-suspend
 
 Suspend execution until it is resumed asynchronously.
